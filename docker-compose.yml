@@ -1,0 +1,104 @@
+version: '3.8'
+
+services:
+  particle-simulator:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+      target: runtime
+    image: particle-sim:latest
+    container_name: particle-simulation
+    
+    # Environment variables
+    environment:
+      - DISPLAY=${DISPLAY:-:0}
+      - LIBGL_ALWAYS_INDIRECT=1
+    
+    # X11 forwarding for OpenGL display
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+      - ./output:/app/output:rw
+      - ./logs:/app/logs:rw
+    
+    # Network settings
+    network_mode: host
+    
+    # Security settings
+    user: "1000:1000"  # Adjust to match host user ID
+    
+    # Resource limits
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+          cpus: '2.0'
+        reservations:
+          memory: 512M
+          cpus: '0.5'
+    
+    # Keep container running for interactive use
+    stdin_open: true
+    tty: true
+    
+    # Override default command for different scenarios
+    command: ["./particle_simulator", "500"]
+
+  # Development version with build tools (for development work)
+  particle-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: builder
+    image: particle-sim:dev
+    container_name: particle-dev
+    environment:
+      - DISPLAY=${DISPLAY:-:0}
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+      - .:/app:rw  # Mount entire source for development
+    working_dir: /app
+    stdin_open: true
+    tty: true
+    command: ["/bin/bash"]
+
+  # Headless version for data generation (no display)
+  particle-headless:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+      target: runtime
+    image: particle-sim:headless
+    container_name: particle-headless
+    
+    # No display needed for headless operation
+    environment:
+      - LIBGL_ALWAYS_SOFTWARE=1
+    
+    volumes:
+      - ./output:/app/output:rw
+      - ./logs:/app/logs:rw
+    
+    # Resource limits for batch processing
+    deploy:
+      resources:
+        limits:
+          memory: 4G
+          cpus: '4.0'
+    
+    # Run longer simulation for data generation
+    command: ["./particle_simulator", "1000"]
+
+# Named volumes for persistent data
+volumes:
+  simulation-output:
+    driver: local
+  simulation-logs:
+    driver: local
+
+# Network for future Team A integration
+networks:
+  ael-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16

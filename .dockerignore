@@ -1,0 +1,72 @@
+# Exclude files that shouldn't be in Docker build context
+
+# Build artifacts
+build/
+Build/
+BUILD/
+
+# Output and logs
+output/
+logs/
+
+# Git files
+.git/
+.gitignore
+
+# Documentation (will be copied selectively)
+*.md
+!README.md
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# System files
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Temporary files
+*.tmp
+*.temp
+*.log
+
+# Package files
+*.tar.gz
+*.zip
+
+# Compiled binaries (will be built in container)
+*.exe
+*.out
+particle_demo
+particle_simulator
+
+# Object files
+*.o
+*.obj
+*.so
+*.dylib
+*.dll
+
+# Debug files
+*.pdb
+*.dSYM/
+
+# Coverage files
+*.gcov
+*.gcno
+*.gcda
+
+# Profiling data
+gmon.out
+callgrind.out.*
+
+# Demo and test files
+DEMO_README.md
+IMPLEMENTATION_COMPLETE.md
+
+# Scripts that aren't needed in container
+run_demo.sh

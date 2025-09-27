@@ -14,3 +14,7 @@ void ParticleSystem::update(float deltaTime) {
 const std::vector<Particle>& ParticleSystem::getParticles() const {
     return particles;
 }
+
+std::vector<Particle>& ParticleSystem::getParticles() {
+    return particles;
+}

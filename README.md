@@ -1,5 +1,89 @@
 # Particle Simulator - Team B
 
+A real-time particle simulation system built with C++ and OpenGL for physics simulation, performance optimization, and ML training data generation.
+
+## 🚀 Quick Start
+
+### Native Build (Recommended)
+
+**macOS:**
+```bash
+# 1. Install dependencies
+brew install cmake glfw glm
+
+# 2. Build and run
+cd /path/to/Particle_Sim_Projet
+chmod +x build_and_run.sh
+./build_and_run.sh
+
+# 3. Or build manually
+mkdir build_native && cd build_native
+cmake ..
+make -j4
+./particle_simulator 100
+```
+
+**Linux (Ubuntu/Debian):**
+```bash
+# 1. Install dependencies
+sudo apt-get update
+sudo apt-get install build-essential cmake libglfw3-dev libglm-dev libgl1-mesa-dev
+
+# 2. Build and run
+cd /path/to/Particle_Sim_Projet
+chmod +x build_and_run.sh
+./build_and_run.sh
+
+# 3. Or build manually
+mkdir build_native && cd build_native
+cmake ..
+make -j$(nproc)
+./particle_simulator 100
+```
+
+**Why Native is Better:**
+- ✅ **Faster performance** - Direct hardware access
+- ✅ **Better graphics** - Native OpenGL without virtualization
+- ✅ **Easier debugging** - Direct terminal output and profiling
+- ✅ **No display issues** - Works immediately on macOS/Linux
+
+### Alternative: Docker
+```bash
+# Build image
+docker build -t particle-simulator .
+
+# Run simulation (requires X11 setup - see troubleshooting)
+docker run --rm -e DISPLAY=host.docker.internal:0 particle-simulator ./particle_simulator 100
+```
+
+### Command Line Options
+```bash
+./particle_simulator 500          # Run with 500 particles
+./particle_simulator --help       # Show help
+./particle_simulator 1000         # Stress test with 1000 particles
+```
+
+### Expected Output
+- **Graphics window** with colored particles moving and bouncing
+- **Terminal output** showing FPS and performance metrics
+- **JSON files** exported to `output/` directory for ML training
+
+```
+=== Particle Simulation System ===
+[INIT] Initializing simulation systems...
+[RENDER] OpenGL Version: 2.1 Metal - 88.1
+[INIT] Created 100 particles
+[RUN] Starting simulation main loop...
+Particle Simulation - FPS: 60
+```
+
+**🎉 Success indicators:**
+- Colored dots moving across the screen
+- FPS counter showing ~60 FPS
+- No error messages in terminal
+
+---
+
 ## Overview
 
 A real-time particle simulation system built with C++ and OpenGL, demonstrating advanced object-oriented programming principles, physics simulation, and performance optimization techniques. This project provides hands-on experience with simulation libraries, containerization, and high-performance computing concepts.
@@ -102,39 +186,62 @@ make -j$(nproc)
 ./particle_simulator
 ```
 
-### Docker Deployment
+### Docker Deployment (Optional)
+
+**💡 Note:** Native builds are recommended for better performance and fewer setup issues. Use Docker for containerized deployments or CI/CD.
 
 1. **Build Docker image**:
 ```bash
-docker build -t particle-simulator .
+# Make script executable
+chmod +x docker_manager.sh
+
+# Build images
+./docker_manager.sh build
 ```
 
 2. **Run containerized simulation**:
 ```bash
-docker run -p 8080:8080 -e DISPLAY=$DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix particle-simulator
+# With display (Linux/macOS)
+./docker_manager.sh run 500
+
+# Headless mode (any platform)
+./docker_manager.sh headless 1000
+
+# Development environment
+./docker_manager.sh dev
+```
+
+3. **Using Docker Compose**:
+```bash
+docker-compose up particle-simulator
 ```
 
 ## Usage
 
-### Basic Simulation
+### Runtime Controls
 ```bash
-# Run with default parameters
-./particle_simulator
+# Basic usage
+./particle_simulator [number_of_particles]
 
-# Run with custom particle count
-./particle_simulator --particles 1000
-
-# Export simulation state to JSON
-./particle_simulator --export simulation_state.json
+# Examples
+./particle_simulator           # Default 500 particles
+./particle_simulator 100       # Lightweight test
+./particle_simulator 1000      # Performance test
+./particle_simulator 2000      # Stress test
 ```
 
-### API Endpoints (If Implemented)
-```
-GET /api/status          - Get current simulation status
-POST /api/particles      - Add particles to simulation
-GET /api/export          - Export current state as JSON
-PUT /api/config          - Update simulation parameters
-```
+### Output Files
+The simulation automatically generates:
+- `output/simulation_data.json` - Real-time training data for ML
+- `output/performance_profile.json` - Performance metrics and timing
+- `output/final_simulation_data.json` - Complete dataset export
+
+### Performance Monitoring
+Watch the terminal output for:
+- **FPS**: Current frames per second (target: 60+)
+- **Physics Updates**: Physics calculations per second
+- **Particle Count**: Number of active particles
+- **Data Export Rate**: MB/hour of training data generated
 
 ## Project Structure
 
@@ -143,6 +250,10 @@ particle-simulator/
 ├── README.md
 ├── CMakeLists.txt
 ├── Dockerfile
+├── .dockerignore
+├── docker-compose.yml
+├── docker_manager.sh
+├── build_and_run.sh
 ├── requirements.txt
 ├── src/
 │   ├── main.cpp
@@ -173,7 +284,8 @@ particle-simulator/
 ├── docs/
 │   ├── architecture.md
 │   ├── performance_analysis.md
-│   └── api_documentation.md
+│   ├── api_documentation.md
+│   └── docker_guide.md
 ├── tests/
 └── benchmarks/
 ```
@@ -288,24 +400,64 @@ Project Link: [https://github.com/team-b/particle-simulator](https://github.com/
 
 ## Troubleshooting
 
-### Common Issues
+### Common Startup Issues
 
-**OpenGL Context Creation Failed**
+**❓ "Failed to initialize GLFW" or "Failed to create GLFW window"**
 ```bash
-# Install Mesa drivers
-sudo apt-get install mesa-utils libgl1-mesa-glx
+# macOS
+brew install glfw
+
+# Linux
+sudo apt-get install libglfw3-dev libgl1-mesa-dev
 ```
 
-**CMake Configuration Errors**
+**❓ "CMake Error" or build failures**
 ```bash
-# Update CMake to latest version
-sudo apt-get install cmake
+# Make sure CMake is recent enough
+cmake --version  # Should be 3.10+
+
+# Clean build
+rm -rf build
+mkdir build && cd build
+cmake ..
+make clean && make
 ```
 
-**Docker Display Issues**
+**❓ Particles not visible or window is black**
+- Make sure you're running in a directory with write permissions for `output/`
+- Try a smaller particle count: `./particle_simulator 10`
+- Check terminal output for error messages
+
+**❓ "GLM not found" errors**
 ```bash
-# Enable X11 forwarding
+# macOS
+brew install glm
+
+# Linux
+sudo apt-get install libglm-dev
+```
+
+**❓ Docker display issues (macOS/Linux)**
+```bash
+# macOS: Install and configure XQuartz
+brew install --cask xquartz
+open -a XQuartz
+# In XQuartz preferences: Security → "Allow connections from network clients"
+xhost +localhost
+
+# Linux: Enable X11 forwarding
 xhost +local:docker
 ```
+**💡 Tip:** Most Docker display issues are avoided by using native builds instead.
 
-For more troubleshooting, see [docs/troubleshooting.md](docs/troubleshooting.md).
+**❓ Performance issues (low FPS)**
+- Try fewer particles: `./particle_simulator 100`
+- Close other graphics-intensive applications
+- Check if GPU drivers are updated
+
+### Getting Help
+- Check the terminal output for specific error messages
+- Run `./particle_simulator --help` for usage information
+- Look in `docs/` directory for detailed documentation
+
+---

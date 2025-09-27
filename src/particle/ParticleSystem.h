@@ -10,6 +10,7 @@ public:
     void addParticle(const Particle& particle);
     void update(float deltaTime);
     const std::vector<Particle>& getParticles() const;
+    std::vector<Particle>& getParticles(); // Non-const version for physics updates
 
 private:
     std::vector<Particle> particles;
